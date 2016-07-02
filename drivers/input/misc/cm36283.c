@@ -2288,15 +2288,15 @@ static int CM36283_probe (struct i2c_client *client,
     if(ret){
          device_unregister(gpio_userCtrl_dev);
     }
-/*	
+	
 	vemmc2_reg = regulator_get(vemmc2_userCtrl_dev, "vemmc2");     
 	if (IS_ERR(vemmc2_reg)) { 
 	    D(" VEMMC2_cm32863 ---regulator get fail !!!\n");
 	}
 	int reg_err;
 	uint8_t reg;
-*/
-/*	
+
+	
     reg_err = intel_msic_reg_read(VEMMC2CNT_ADDR, &reg);
 	if (reg_err){
               D(" VEMMC2_cm32863 ---regulator read VEMMC2CNT_ADDR fail !!!\n");
@@ -2316,15 +2316,15 @@ static int CM36283_probe (struct i2c_client *client,
 	if (!reg_err){
 	     D(" VEMMC2_cm32863 ---regulator read VEMMC2CNT_ADDR final = %d 2!!!\n",reg);
 	}
-*/
-/*
+
+
     reg_err = regulator_set_mode(vemmc2_reg, 0x02);
 	
     if(!reg_err)
 	     D("VEMMC2_cm32863 ---regulator setmode success !!\n");
     else 
      	D("VEMMC2_cm32863 ---regulator setmode fail !!\n");
-*/
+
 #endif //DEBUG_VEMMC2
 	lpi->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 1;
 	lpi->early_suspend.suspend = CM36283_early_suspend;
@@ -2607,13 +2607,13 @@ static int CM36283_suspend(struct i2c_client *client , pm_message_t mesg)
 	int status_calling = lpi->status_calling;
     D("CM32683:  CM36283_suspend  no.1 \n");
 
-	//if (lpi->ps_enable && !status_calling){
-	//	  D("CM32683:  CM36283_suspend  no.2 \n");
-  	//	  psensor_disable(lpi);
-  	 //     lpi->psensor_sleep_becuz_suspend =1;
-	//	  D("CM32683:  CM36283_suspend  no.3 \n");
+	if (lpi->ps_enable && !status_calling){
+		  D("CM32683:  CM36283_suspend  no.2 \n");
+  		  psensor_disable(lpi);
+  	      lpi->psensor_sleep_becuz_suspend =1;
+		  D("CM32683:  CM36283_suspend  no.3 \n");
 		disable_irq_nosync(lp_info_cm36283->irq);
-	//}
+	}
 
     D("CM32683:  CM36283_suspend  no.4 \n");
 	return 0;
@@ -2623,11 +2623,11 @@ static int CM32683_resume(struct i2c_client *client)
 {
      D("CM36283:  CM32683_resume\n");
 	 struct CM36283_info *lpi = lp_info_cm36283;
-	// if (!lpi->ps_enable && lpi->psensor_sleep_becuz_suspend){
-	//	 psensor_enable(lpi);
-         //lpi->psensor_sleep_becuz_suspend =0;
+	 if (!lpi->ps_enable && lpi->psensor_sleep_becuz_suspend){
+		 psensor_enable(lpi);
+         lpi->psensor_sleep_becuz_suspend =0;
 		enable_irq(lp_info_cm36283->irq);
-    //}
+    }
 	return 0;
 }
 

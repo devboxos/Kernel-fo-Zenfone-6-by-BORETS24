@@ -16,7 +16,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  */
-//#define DEBUG
+#define DEBUG
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -34,7 +34,7 @@
 #include <asm/intel-mid.h>
 #include <asm/intel_scu_flis.h>
 #include <linux/proc_fs.h>
-//#include "../../base/base.h"
+#include "../../base/base.h"
 
 #define INPUT_PHYS_NAME "synaptics_dsx/touch_input"
 
@@ -48,9 +48,9 @@
 
 #define F12_DATA_15_WORKAROUND
 
-/*
+
 #define IGNORE_FN_INIT_FAILURE
-*/
+
 
 #define RPT_TYPE (1 << 0)
 #define RPT_X_LSB (1 << 1)
@@ -910,8 +910,8 @@ static int tp_proximity_proc_read(char *buf, char **start, off_t offset, int req
 static int tp_proximity_proc_write(struct file *file, const char *buffer,
 				      unsigned long count, void *data)
 {
-        //struct device_private *dpp = container_of(data, struct device_private, driver_data);
-	//struct device *dev = container_of(dpp, struct device, p);
+        struct device_private *dpp = container_of(data, struct device_private, driver_data);
+	struct device *dev = container_of(dpp, struct device, p);
 
 	if ((int)(*buffer) == (1+48)) {		//No Touch
 		touch_proximity_at_phone = 1;
@@ -1155,12 +1155,12 @@ static int synaptics_rmi4_f12_abs_report(struct synaptics_rmi4_data *rmi4_data,
 		if (retval < 0)
 			return 0;
 
-		//dev_dbg(rmi4_data->pdev->dev.parent, "%s: data4_offset:0x%x\n", __func__, data_addr + extra_data->data4_offset);
+		dev_dbg(rmi4_data->pdev->dev.parent, "%s: data4_offset:0x%x\n", __func__, data_addr + extra_data->data4_offset);
 		dev_dbg(rmi4_data->pdev->dev.parent, "%s: data4_data[0]:%d\n", __func__, extra_data->data4_data[0]);	//Gesture Type
-		//dev_dbg(rmi4_data->pdev->dev.parent, "%s: data4_data[1]:%d\n", __func__, extra_data->data4_data[1]);
-		//dev_dbg(rmi4_data->pdev->dev.parent, "%s: data4_data[2]:%d\n", __func__, extra_data->data4_data[2]);
-		//dev_dbg(rmi4_data->pdev->dev.parent, "%s: data4_data[3]:%d\n", __func__, extra_data->data4_data[3]);
-		//dev_dbg(rmi4_data->pdev->dev.parent, "%s: data4_data[4]:%d\n", __func__, extra_data->data4_data[4]);
+		dev_dbg(rmi4_data->pdev->dev.parent, "%s: data4_data[1]:%d\n", __func__, extra_data->data4_data[1]);
+		dev_dbg(rmi4_data->pdev->dev.parent, "%s: data4_data[2]:%d\n", __func__, extra_data->data4_data[2]);
+		dev_dbg(rmi4_data->pdev->dev.parent, "%s: data4_data[3]:%d\n", __func__, extra_data->data4_data[3]);
+		dev_dbg(rmi4_data->pdev->dev.parent, "%s: data4_data[4]:%d\n", __func__, extra_data->data4_data[4]);
 
 		if (extra_data->data4_data[0] != 0) {
 			retval = synaptics_rmi4_reg_read(rmi4_data,
@@ -1170,7 +1170,7 @@ static int synaptics_rmi4_f12_abs_report(struct synaptics_rmi4_data *rmi4_data,
 			if (retval < 0)
 				return 0;
 
-			//dev_dbg(rmi4_data->pdev->dev.parent, "%s: f12_ctrl20_base_addr:0x%x\n", __func__, rmi4_data->f12_ctrl20_base_addr);
+			dev_dbg(rmi4_data->pdev->dev.parent, "%s: f12_ctrl20_base_addr:0x%x\n", __func__, rmi4_data->f12_ctrl20_base_addr);
 			dev_dbg(rmi4_data->pdev->dev.parent, "%s: ctrl_20.report_flags:%d\n", __func__, ctrl_20.report_flags);	//Report Wakeup Gestures Only
 
 			ctrl_20.report_flags &= 0xFD;
@@ -1199,7 +1199,7 @@ static int synaptics_rmi4_f12_abs_report(struct synaptics_rmi4_data *rmi4_data,
 		if (retval < 0)
 			return 0;
 
-		//dev_dbg(rmi4_data->pdev->dev.parent, "%s: f12_ctrl20_base_addr:0x%x\n", __func__, rmi4_data->f12_ctrl20_base_addr);
+		dev_dbg(rmi4_data->pdev->dev.parent, "%s: f12_ctrl20_base_addr:0x%x\n", __func__, rmi4_data->f12_ctrl20_base_addr);
 		dev_dbg(rmi4_data->pdev->dev.parent, "%s: ctrl_20.report_flags:%d\n", __func__, ctrl_20.report_flags);	//Report Wakeup Gestures Only
 
 		if (ctrl_20.report_flags & 0x02 != 0) {
@@ -2677,7 +2677,8 @@ static void synaptics_rmi4_set_params(struct synaptics_rmi4_data *rmi4_data)
 	input_set_abs_params(rmi4_data->input_dev,
 			ABS_MT_POSITION_Y, 0,
 			1280, 0, 0);	//<ASUS_virtual_key+>
-//<ASUS_virtual_key+>			rmi4_data->sensor_max_y, 0, 0);
+rmi4_data->sensor_max_y, 0, 0);
+//<ASUS_virtual_key+>			
 #ifdef REPORT_2D_W
 	input_set_abs_params(rmi4_data->input_dev,
 			ABS_MT_TOUCH_MAJOR, 0,
@@ -3179,7 +3180,7 @@ static void synaptics_rmi4_exp_fn_work(struct work_struct *work)
 
 	list_for_each_entry_continue( find_ps_input_dev_ptr, &node_start, node ){ 
 		dev_info(rmi4_data->pdev->dev.parent,"input_dev new is %s!!\n",find_ps_input_dev_ptr->name);
-		//dev_info(rmi4_data->pdev->dev.parent,"input_dev old is %s!!\n",rmi4_data->input_dev->name);                                                                  
+		dev_info(rmi4_data->pdev->dev.parent,"input_dev old is %s!!\n",rmi4_data->input_dev->name);                                                                  
 
 		if (find_ps_input_dev_ptr->name == "proximity" ){
 			find_ps_input_dev = 1;
@@ -3732,13 +3733,13 @@ static void synaptics_rmi4_early_suspend(struct early_suspend *h)
 
 		synaptics_rmi4_free_fingers(rmi4_data);
 
-//		mutex_lock(&exp_data.mutex);
-//		if (!list_empty(&exp_data.list)) {
-//			list_for_each_entry(exp_fhandler, &exp_data.list, link)
-//				if (exp_fhandler->exp_fn->early_suspend != NULL)
-//					exp_fhandler->exp_fn->early_suspend(rmi4_data);
-//		}
-//		mutex_unlock(&exp_data.mutex);
+		mutex_lock(&exp_data.mutex);
+		if (!list_empty(&exp_data.list)) {
+			list_for_each_entry(exp_fhandler, &exp_data.list, link)
+				if (exp_fhandler->exp_fn->early_suspend != NULL)
+					exp_fhandler->exp_fn->early_suspend(rmi4_data);
+		}
+		mutex_unlock(&exp_data.mutex);
 
 		wake_unlock(&rmi4_data->wake_lock);
 
@@ -3826,13 +3827,13 @@ static void synaptics_rmi4_late_resume(struct early_suspend *h)
 				&ctrl_20.data,
 				sizeof(ctrl_20.data));
 
-//		mutex_lock(&exp_data.mutex);
-//		if (!list_empty(&exp_data.list)) {
-//			list_for_each_entry(exp_fhandler, &exp_data.list, link)
-//				if (exp_fhandler->exp_fn->late_resume != NULL)
-//					exp_fhandler->exp_fn->late_resume(rmi4_data);
-//		}
-//		mutex_unlock(&exp_data.mutex);
+		mutex_lock(&exp_data.mutex);
+		if (!list_empty(&exp_data.list)) {
+			list_for_each_entry(exp_fhandler, &exp_data.list, link)
+				if (exp_fhandler->exp_fn->late_resume != NULL)
+					exp_fhandler->exp_fn->late_resume(rmi4_data);
+		}
+		mutex_unlock(&exp_data.mutex);
 
 		wake_unlock(&rmi4_data->wake_lock);
 
@@ -3928,8 +3929,8 @@ static int synaptics_rmi4_suspend(struct device *dev)
 	struct synaptics_rmi4_f12_ctrl_20 ctrl_20;
 
 	if (rmi4_data->dclick_mode == 1) {
-//		wake_lock(&rmi4_data->wake_lock);
-/*
+		wake_lock(&rmi4_data->wake_lock);
+
 		retval = synaptics_rmi4_reg_read(rmi4_data,
 				rmi4_data->f12_ctrl20_base_addr,
 				ctrl_20.data,
@@ -3943,18 +3944,18 @@ static int synaptics_rmi4_suspend(struct device *dev)
 				rmi4_data->f12_ctrl20_base_addr,
 				&ctrl_20.data,
 				sizeof(ctrl_20.data));
-*/
-//		synaptics_rmi4_free_fingers(rmi4_data);
 
-//		mutex_lock(&exp_data.mutex);
-//		if (!list_empty(&exp_data.list)) {
-//			list_for_each_entry(exp_fhandler, &exp_data.list, link)
-//				if (exp_fhandler->exp_fn->suspend != NULL)
-//					exp_fhandler->exp_fn->suspend(rmi4_data);
-//		}
-//		mutex_unlock(&exp_data.mutex);
+		synaptics_rmi4_free_fingers(rmi4_data);
 
-//		wake_unlock(&rmi4_data->wake_lock);
+		mutex_lock(&exp_data.mutex);
+		if (!list_empty(&exp_data.list)) {
+			list_for_each_entry(exp_fhandler, &exp_data.list, link)
+				if (exp_fhandler->exp_fn->suspend != NULL)
+					exp_fhandler->exp_fn->suspend(rmi4_data);
+		}
+		mutex_unlock(&exp_data.mutex);
+
+		wake_unlock(&rmi4_data->wake_lock);
 
 		return 0;
 	} else {
@@ -4014,8 +4015,8 @@ static int synaptics_rmi4_resume(struct device *dev)
 	struct synaptics_rmi4_f12_ctrl_20 ctrl_20;
 
 	if (rmi4_data->dclick_mode == 1) {
-//		wake_lock(&rmi4_data->wake_lock);
-/*
+		wake_lock(&rmi4_data->wake_lock);
+
 		retval = synaptics_rmi4_reg_read(rmi4_data,
 				rmi4_data->f12_ctrl20_base_addr,
 				ctrl_20.data,
@@ -4029,20 +4030,20 @@ static int synaptics_rmi4_resume(struct device *dev)
 				rmi4_data->f12_ctrl20_base_addr,
 				&ctrl_20.data,
 				sizeof(ctrl_20.data));
-*/
-//		mutex_lock(&exp_data.mutex);
-//		if (!list_empty(&exp_data.list)) {
-//			list_for_each_entry(exp_fhandler, &exp_data.list, link)
-//				if (exp_fhandler->exp_fn->resume != NULL)
-//					exp_fhandler->exp_fn->resume(rmi4_data);
-//		}
-//		mutex_unlock(&exp_data.mutex);
 
-//		wake_unlock(&rmi4_data->wake_lock);
+		mutex_lock(&exp_data.mutex);
+		if (!list_empty(&exp_data.list)) {
+			list_for_each_entry(exp_fhandler, &exp_data.list, link)
+				if (exp_fhandler->exp_fn->resume != NULL)
+					exp_fhandler->exp_fn->resume(rmi4_data);
+		}
+		mutex_unlock(&exp_data.mutex);
+
+		wake_unlock(&rmi4_data->wake_lock);
 
 		return 0;
 	} else {
-/*
+
 		retval = synaptics_rmi4_reg_read(rmi4_data,
 				rmi4_data->f12_ctrl20_base_addr,
 				ctrl_20.data,
@@ -4056,7 +4057,7 @@ static int synaptics_rmi4_resume(struct device *dev)
 				rmi4_data->f12_ctrl20_base_addr,
 				&ctrl_20.data,
 				sizeof(ctrl_20.data));
-*/
+
 #endif
 //<ASUS_DTP->
 
@@ -4069,15 +4070,15 @@ static int synaptics_rmi4_resume(struct device *dev)
 		rmi4_data->current_page = MASK_8BIT;
 	}
 
-	//synaptics_rmi4_sensor_wake(rmi4_data);
-	//synaptics_rmi4_irq_enable(rmi4_data, true);
-	//retval = synaptics_rmi4_reinit_device(rmi4_data);
-	//if (retval < 0) {
-	//	dev_err(rmi4_data->pdev->dev.parent,
-	//			"%s: Failed to reinit device\n",
-	//			__func__);
-	//	return retval;
-	//}
+	synaptics_rmi4_sensor_wake(rmi4_data);
+	synaptics_rmi4_irq_enable(rmi4_data, true);
+	retval = synaptics_rmi4_reinit_device(rmi4_data);
+	if (retval < 0) {
+	dev_err(rmi4_data->pdev->dev.parent,
+				"%s: Failed to reinit device\n",
+				__func__);
+		return retval;
+	}
 
 	mutex_lock(&exp_data.mutex);
 	if (!list_empty(&exp_data.list)) {
